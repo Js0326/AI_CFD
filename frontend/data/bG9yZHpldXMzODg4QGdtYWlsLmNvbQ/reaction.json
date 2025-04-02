@@ -1,0 +1,20 @@
+{
+  "reactionTimes": [
+    519,
+    637,
+    476,
+    610,
+    737,
+    335,
+    313,
+    406,
+    929,
+    407
+  ],
+  "averageReactionTime": 537,
+  "fastestReaction": 313,
+  "slowestReaction": 929,
+  "completedRounds": 10,
+  "totalRounds": 10,
+  "timestamp": "2025-04-02T11:25:14.078Z"
+}
