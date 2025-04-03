@@ -76,16 +76,31 @@ export async function getFatiguePrediction() {
       return null
     }
 
-    const url = new URL("/api/predict-fatigue", window.location.origin)
-    url.searchParams.append("userId", user.id)
+    // Use explicit backend URL
+    const apiUrl = "http://localhost:5000/api/predict"
+    console.log("Fetching fatigue prediction from:", apiUrl, "with user ID:", user.id)
+    
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        // Include any other data needed for prediction
+        timestamp: new Date().toISOString(),
+      }),
+    })
 
-    const response = await fetch(url)
+    console.log("Response status:", response.status, response.statusText)
 
     if (!response.ok) {
       throw new Error(`Failed to get fatigue prediction: ${response.statusText}`)
     }
 
-    return await response.json()
+    const data = await response.json()
+    console.log("Prediction data received:", data)
+    return data
   } catch (error) {
     console.error("Error getting fatigue prediction:", error)
     return null

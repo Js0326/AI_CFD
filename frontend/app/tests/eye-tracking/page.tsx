@@ -183,7 +183,7 @@ export default function EyeTrackingTestPage() {
     let lastGazePosition = { x: canvas.width / 2, y: canvas.height / 2 }
 
     // Data collection interval - collect eye metrics every second
-    const dataCollectionInterval = setInterval(() => {
+    dataCollectionIntervalRef.current = setInterval(() => {
       // Calculate blink rate (blinks per minute)
       const blinkRate = Math.min(60000 / Math.max(500, Date.now() - lastBlinkTime), 30)
 
@@ -331,9 +331,13 @@ export default function EyeTrackingTestPage() {
 
       // Return cleanup function
       return () => {
-        clearInterval(dataCollectionInterval)
+        if (dataCollectionIntervalRef.current) {
+          clearInterval(dataCollectionIntervalRef.current)
+          dataCollectionIntervalRef.current = null
+        }
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current)
+          animationFrameRef.current = null
         }
       }
   }
@@ -357,19 +361,32 @@ export default function EyeTrackingTestPage() {
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
+        animationFrameRef.current = null
       }
 
       if (calibrationIntervalRef.current) {
         clearInterval(calibrationIntervalRef.current)
+        calibrationIntervalRef.current = null
+      }
+      
+      if (dataCollectionIntervalRef.current) {
+        clearInterval(dataCollectionIntervalRef.current)
+        dataCollectionIntervalRef.current = null
       }
     }
   }, [])
 
   // End the test and calculate results
   const endTest = () => {
-    // Cancel animation frame
+    // Cancel animation frame and intervals
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current)
+      animationFrameRef.current = null
+    }
+    
+    if (dataCollectionIntervalRef.current) {
+      clearInterval(dataCollectionIntervalRef.current)
+      dataCollectionIntervalRef.current = null
     }
 
     // Calculate average metrics from collected data

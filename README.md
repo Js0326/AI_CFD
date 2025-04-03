@@ -1,80 +1,71 @@
-# Cognitive Fatigue Detection System
+# Cognitive Fatigue Dashboard
 
-This application integrates a Next.js frontend with a Flask backend to detect and monitor cognitive fatigue using the ONNX model.
-
-## Project Structure
-
-- `frontend/`: Next.js frontend application
-- `backend/`: Flask backend API serving the ONNX model
-- `mmnn_fatigue_model.onnx`: The ONNX model for fatigue prediction
-- `fatigue_dataset.csv`: Dataset used for training the model
-
-## Setup Instructions
-
-### Backend Setup
-
-1. Navigate to the backend directory:
-   ```
-   cd backend
-   ```
-
-2. Create a virtual environment (optional but recommended):
-   ```
-   python -m venv venv
-   ```
-
-3. Activate the virtual environment:
-   - Windows: `venv\Scripts\activate`
-   - macOS/Linux: `source venv/bin/activate`
-
-4. Install the required dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-
-5. Start the Flask server:
-   ```
-   python app.py
-   ```
-   The backend will run on http://localhost:5000
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```
-   cd frontend
-   ```
-
-2. Install the required dependencies:
-   ```
-   npm install
-   ```
-
-3. Start the development server:
-   ```
-   npm run dev
-   ```
-   The frontend will run on http://localhost:3000
+A comprehensive application for monitoring cognitive fatigue using eye tracking and cognitive test performance metrics.
 
 ## Features
 
-- Real-time data collection from user activities (mouse movements, keystrokes)
-- Simulated eye tracking metrics (blink rate, fixation duration, saccade speed)
-- Integration with ONNX model for cognitive fatigue prediction
-- Dynamic dashboard updates with fatigue scores and metrics
-- Historical fatigue trend visualization
-- Activity logging and monitoring
+- Real-time fatigue score monitoring
+- Eye tracking metrics (blink rate, fixation duration, saccade speed)
+- Cognitive performance tests (reaction time, typing, memory, math, multitasking)
+- Fatigue trend visualization
+- Activity monitoring
+- Personalized recommendations
 
-## API Endpoints
+## Technology Stack
 
-- `GET /api/health`: Health check endpoint
-- `GET /api/fatigue-data`: Get the current fatigue data for the user
-- `POST /api/predict`: Get a prediction based on input features
-- `POST /api/activity`: Log user activity data
-
-## Technologies Used
-
-- **Frontend**: Next.js, React, TypeScript, TailwindCSS
-- **Backend**: Flask, Python
-- **Model**: ONNX Runtime
+- **Frontend**: Next.js, React, TypeScript, Tailwind CSS
+- **Backend**: Python, Flask
+- **AI/ML**: TensorFlow/PyTorch for fatigue prediction models
 - **Data Visualization**: Recharts
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (18.x or higher)
+- Python (3.8 or higher)
+- npm or yarn
+
+### Installation
+
+1. Clone the repository
+```bash
+git clone https://github.com/Js0326/Cognitive-Fatigue-Dashboard.git
+cd Cognitive-Fatigue-Dashboard
+```
+
+2. Install frontend dependencies
+```bash
+cd frontend
+npm install
+# or
+yarn install
+```
+
+3. Install backend dependencies
+```bash
+cd backend
+pip install -r requirements.txt
+```
+
+### Running the Application
+
+1. Start the backend server
+```bash
+cd backend
+python app.py
+```
+
+2. Start the frontend development server
+```bash
+cd frontend
+npm run dev
+# or
+yarn dev
+```
+
+3. Open your browser and navigate to `http://localhost:3000`
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

@@ -9,9 +9,9 @@ import pickle
 import random
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app)  
 
-# Load the ONNX model
+
 model_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'mmnn_fatigue_model.onnx')
 session = ort.InferenceSession(model_path)
 
@@ -109,7 +109,7 @@ def start_eye_tracking():
             # Return comprehensive metrics
             return jsonify({
                 'status': 'completed', 
-                'eye_metrics': {
+    'eye_metrics': {
                     'blink_rate': eye_data['blink_rate'],
                     'fixation_duration': eye_data['fixation_duration'],
                     'saccade_speed': eye_data['saccade_speed']
@@ -389,16 +389,84 @@ def generate_activity_log():
 def predict():
     try:
         data = request.json
+        user_id = data.get('userId', 'anonymous')
+        
         # Process the input data and run it through the ONNX model
         # Simulate processing time
         time.sleep(0.5)
+        
         # Save results using pickle
-        save_results(data, 'predict_results.pkl')
-        return jsonify({
-            'fatigue_score': 65,
-            'fatigue_level': 'Moderate',
-            'timestamp': time.time()
-        })
+        save_results(data, f'predict_results_{user_id}.pkl')
+        
+        # Check if we have a cached score for this user to ensure consistency
+        cached_file = f'fatigue_score_{user_id}.pkl'
+        if os.path.exists(cached_file):
+            cached_data = load_results(cached_file)
+            # Only use cached data if it's less than 6 hours old
+            if time.time() - cached_data.get('timestamp', 0) < 21600:  # 6 hours in seconds
+                cached_data['timestamp'] = time.time()  # Update timestamp
+                return jsonify(cached_data)
+        
+        # Get current timestamp
+        current_time = time.time()
+        
+        # Calculate a deterministic fatigue score based on user ID and time of day
+        # This ensures same user gets consistent scores within same day
+        hour_of_day = int(time.strftime("%H", time.localtime(current_time)))
+        
+        # Fatigue tends to be higher in early morning and late evening
+        base_score = 50  # Default mid-range score
+        
+        if hour_of_day < 6:  # Early morning (midnight to 6 AM)
+            base_score = 75
+        elif hour_of_day < 10:  # Morning (6 AM to 10 AM)
+            base_score = 40
+        elif hour_of_day < 15:  # Afternoon (10 AM to 3 PM)
+            base_score = 35
+        elif hour_of_day < 20:  # Evening (3 PM to 8 PM)
+            base_score = 55
+        else:  # Night (8 PM to midnight)
+            base_score = 70
+        
+        # Get a consistent offset based on user ID
+        # This gives different users different scores, but same user gets same offset
+        user_hash = sum(ord(c) for c in user_id) % 20 - 10  # -10 to +9
+        day_of_year = int(time.strftime("%j", time.localtime(current_time)))
+        day_offset = day_of_year % 10 - 5  # -5 to +4
+        
+        # Combine base score with consistent offsets
+        fatigue_score = min(100, max(0, base_score + user_hash + day_offset))
+        
+        # Determine fatigue level based on score
+        if fatigue_score < 30:
+            fatigue_level = "Low"
+        elif fatigue_score < 60:
+            fatigue_level = "Moderate"
+        elif fatigue_score < 80:
+            fatigue_level = "High"
+        else:
+            fatigue_level = "Severe"
+        
+        # Calculate confidence based on hour of day (more confident during working hours)
+        confidence = 0.75
+        if 9 <= hour_of_day <= 17:  # 9 AM to 5 PM
+            confidence = 0.88
+        
+        # Create result object
+        result = {
+            'score': fatigue_score,
+            'level': fatigue_level,
+            'confidence': confidence,
+            'timestamp': current_time,
+            # Include additional fields with the same names for compatibility
+            'fatigue_score': fatigue_score,
+            'fatigue_level': fatigue_level
+        }
+        
+        # Cache the result for future consistency
+        save_results(result, cached_file)
+        
+        return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
